@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8">
+    <title>Vue Mastery</title>
+
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="%= BASE_URL %>favicon.ico">
+    
+    <script src="https://unpkg.com/vue@3.2.31/dist/vue.global.js"></script> <!-- Using a stable version -->
+  </head>
+  <body>
+    <div id="app">
+      <div class="nav-bar"></div>
+  
+      <div class="cart">Carrito({{ cart }})</div>
+  
+      <div class="product-display">
+        <div class="product-container">
+          <div class="product-image">
+            <img v-bind:src="image" alt="Product Image">
+          </div>
+          <div class="product-info">
+            <h1>{{ title }}</h1>
+            <p v-if="inventory > 10">En Stock</p>
+            <p v-else-if="inventory <= 10 && inventory > 0">Quedan pocas unidades</p>
+            <p v-else>Fuera de Stock</p>
+  
+            <ul>
+              <li v-for="alias in components" :key="alias">{{ alias }}</li>
+            </ul>
+            
+            <div
+             v-for="(variant, index) in variants"
+             :key="variant.id"
+             @mouseover="updateVariant(index)"
+             class="color-circle"
+             :style="{ backgroundColor: variant.color }">
+            </div>
+  
+            <button
+              class="button"
+              :class="{ disabledButton: !enStock }"
+              :disabled="!enStock"
+              v-on:click="addToCart">
+              Añadir al carrito
+            </button>
+  
+            <button
+              class="buttonRemove"
+              :class="{ disabledButton: !cart }"
+              :disabled="!cart"
+              v-on:click="removeFromCart">
+              Eliminar del carrito
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <noscript>
+      <strong>We're sorry but %= htmlWebpackPlugin.options.title % doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
+    </noscript>
+
+    <script src="main.js"></script>
+  </body>
+</html>

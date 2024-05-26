@@ -1,0 +1,6 @@
+@TutorialNet_HostAddress = http://localhost:5225
+
+GET {{TutorialNet_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
