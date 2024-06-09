@@ -5,29 +5,43 @@ using TodoApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Add services to the container.
 builder.Services.AddControllers();
-builder.Services.AddDbContext<TodoContext>(opt =>
-    opt.UseInMemoryDatabase("TodoList"));
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(configuration => {
-    configuration.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
-    configuration.ResolveConflictingActions(apiDescriptions => apiDescriptions.Last());
-    var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-    configuration.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAllOrigins", builder =>
+    {
+        builder.AllowAnyOrigin()
+               .AllowAnyMethod()
+               .AllowAnyHeader();
+    });
 });
 
 var app = builder.Build();
 
+// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseDeveloperExceptionPage();
+}
+else
+{
+    app.UseExceptionHandler("/Home/Error");
+    app.UseHsts();
 }
 
 app.UseHttpsRedirection();
+app.UseStaticFiles(); // Servir archivos estáticos
+
+app.UseRouting();
+
+app.UseCors("AllowAllOrigins");
 
 app.UseAuthorization();
 
 app.MapControllers();
+
+// Redirigir todas las rutas al archivo index.html
+app.MapFallbackToFile("index.html");
 
 app.Run();
