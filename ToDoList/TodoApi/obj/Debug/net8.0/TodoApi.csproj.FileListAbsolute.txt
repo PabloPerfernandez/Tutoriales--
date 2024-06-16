@@ -508,3 +508,5 @@ E:\SmartWay\Tutoriales\Tutoriales\ToDoList\TodoApi\obj\Debug\net8.0\TodoApi.genr
 E:\SmartWay\Tutoriales\Tutoriales\ToDoList\TodoApi\obj\Debug\net8.0\ref\TodoApi.dll
 E:\SmartWay\Tutoriales\Tutoriales\ToDoList\TodoApi\bin\Debug\net8.0\package-lock.json
 E:\SmartWay\Tutoriales\Tutoriales\ToDoList\TodoApi\bin\Debug\net8.0\package.json
+D:\Smartway\ByteStorm_Introduccion\Tutoriales--\ToDoList\TodoApi\bin\Debug\net8.0\package-lock.json
+D:\Smartway\ByteStorm_Introduccion\Tutoriales--\ToDoList\TodoApi\bin\Debug\net8.0\package.json
