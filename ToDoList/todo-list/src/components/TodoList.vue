@@ -1,9 +1,9 @@
 <template>
   <div>
     <h1 class="header">
-      <video ref="headerVideo" src="@/assets/Rosa.mp4" width="400" autoplay loop muted></video>
-      <video ref="deleteVideo" src="@/assets/Rojo.mp4" @ended="onDeleteVideoEnded" muted style="display:none;"></video>
-      <video ref="completeVideo" src="@/assets/Verde.mp4" @ended="onCompleteVideoEnded" muted style="display:none;"></video>
+      <video ref="headerVideo" src="@/assets/Rosa.mp4" v-show="!TodoVideoDelete && !TodoVideoAdd" width="400" autoplay loop muted></video>
+      <video ref="deleteVideo" src="@/assets/Rojo.mp4" v-show="TodoVideoDelete" @ended="onDeleteVideoEnded" muted></video>
+      <video ref="completeVideo" src="@/assets/Verde.mp4" v-show="TodoVideoAdd" @ended="onCompleteVideoEnded" muted></video>
     </h1>
     <div class="tareas">
         <input v-model="newTodo" placeholder="Add a new task" />
@@ -19,13 +19,16 @@
 
 <script>
 import axios from '../axios'; // Importa desde el archivo axios.js en la carpeta src
+import {getToDo} from '../Api/TodoApi.js'
 import TodoItem from './TodoItem.vue';
 
 export default {
   data() {
     return {
       todos: [],
-      newTodo: ''
+      newTodo: '',
+      TodoVideoDelete: false,
+      TodoVideoAdd: false,
     };
   },
   components: {
@@ -33,7 +36,7 @@ export default {
   },
   methods: {
     fetchTodos() {
-      axios.get('/TodoItems')
+      getToDo() //axios.get('/TodoItems')
         .then(response => {
           this.todos = response.data;
         })
@@ -66,9 +69,9 @@ export default {
       const updatedTodo = { ...todo, isComplete: !todo.isComplete };
       
       axios.put(`/TodoItems/${todo.id}`, updatedTodo)
-        .then(response => {
+        .then(() => {
           const index = this.todos.findIndex(t => t.id === todo.id);
-          this.todos.splice(index, 1, response.data);
+          this.todos.splice(index, 1, updatedTodo);
           this.playCompleteVideo(); // Video de completado
         })
         .catch(error => {
@@ -76,20 +79,22 @@ export default {
         });
     },
     playDeleteVideo() {
-      const headerVideo = this.$refs.headerVideo;
+      // const headerVideo = this.$refs.headerVideo;
+      this.TodoVideoDelete = true;
       const deleteVideo = this.$refs.deleteVideo;
       
-      headerVideo.style.display = 'none';
-      deleteVideo.style.display = 'block';
+      // headerVideo.style.display = 'none';
+      // deleteVideo.style.display = 'block';
       deleteVideo.play();
     },
     onDeleteVideoEnded() {
-      const headerVideo = this.$refs.headerVideo;
-      const deleteVideo = this.$refs.deleteVideo;
+      // const headerVideo = this.$refs.headerVideo;
+      this.TodoVideoDelete = false;
+      // const deleteVideo = this.$refs.deleteVideo;
 
-      deleteVideo.style.display = 'none';
-      headerVideo.style.display = 'block';
-      headerVideo.play();
+      // deleteVideo.style.display = 'none';
+      // headerVideo.style.display = 'block';
+      // headerVideo.play();
     },
     playCompleteVideo() {
       const headerVideo = this.$refs.headerVideo;
