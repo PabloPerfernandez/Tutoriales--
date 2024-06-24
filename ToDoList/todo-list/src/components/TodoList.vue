@@ -1,13 +1,13 @@
 <template>
   <div>
     <h1 class="header">
-      <video ref="headerVideo" src="@/assets/Rosa.mp4" v-show="!TodoVideoDelete && !TodoVideoAdd" width="400" autoplay loop muted></video>
-      <video ref="deleteVideo" src="@/assets/Rojo.mp4" v-show="TodoVideoDelete" @ended="onDeleteVideoEnded" muted></video>
-      <video ref="completeVideo" src="@/assets/Verde.mp4" v-show="TodoVideoAdd" @ended="onCompleteVideoEnded" muted></video>
+      <video ref="headerVideo" src="@/assets/Rosa.mp4" v-show="!TodoVideoDelete && !TodoVideoComplete" width="400" autoplay loop muted></video>
+      <video ref="deleteVideo" src="@/assets/Rojo.mp4" v-show="TodoVideoDelete" @ended="onDeleteVideoEnded" width="400" muted></video>
+      <video ref="completeVideo" src="@/assets/Verde.mp4" v-show="TodoVideoComplete" @ended="onCompleteVideoEnded" width="400" muted></video>
     </h1>
     <div class="tareas">
-        <input v-model="newTodo" placeholder="Add a new task" />
-        <button @click="addTodo">Add</button>
+        <input v-model="newTodo" placeholder="Añade una nueva tarea" />
+        <button @click="addTodo">Añadir</button>
       <ul>
         <li v-for="todo in todos" :key="todo.id">
           <TodoItem :todo="todo" @delete-todo="deleteTodo" @toggle-complete="toggleComplete" />
@@ -18,8 +18,7 @@
 </template>
 
 <script>
-import axios from '../axios'; // Importa desde el archivo axios.js en la carpeta src
-import {getToDo} from '../Api/TodoApi.js'
+import todoApi from '../Api/TodoApi';
 import TodoItem from './TodoItem.vue';
 
 export default {
@@ -28,95 +27,93 @@ export default {
       todos: [],
       newTodo: '',
       TodoVideoDelete: false,
-      TodoVideoAdd: false,
+      TodoVideoComplete: false,
     };
   },
   components: {
-    TodoItem
+    TodoItem,
   },
   methods: {
     fetchTodos() {
-      getToDo() //axios.get('/TodoItems')
-        .then(response => {
+      todoApi.getToDo()
+        .then((response) => {
           this.todos = response.data;
         })
-        .catch(error => {
-          console.error("There was an error fetching the todos!", error);
+        .catch((error) => {
+          console.error('There was an error fetching the todos!', error);
         });
     },
     addTodo() {
       if (this.newTodo.trim() === '') return;
-      axios.post('/TodoItems', { name: this.newTodo, isComplete: false })
-        .then(response => {
+      const todo = { name: this.newTodo, isComplete: false };
+      todoApi.addToDo(todo)
+        .then((response) => {
           this.todos.push(response.data);
           this.newTodo = '';
         })
-        .catch(error => {
-          console.error("There was an error adding the todo!", error);
+        .catch((error) => {
+          console.error('There was an error adding the todo!', error);
         });
     },
     deleteTodo(id) {
-      axios.delete(`/TodoItems/${id}`)
+      todoApi.deleteToDo(id)
         .then(() => {
-          this.todos = this.todos.filter(todo => todo.id !== id);
+          this.todos = this.todos.filter((todo) => todo.id !== id);
           this.playDeleteVideo(); // Video de eliminación
         })
-        .catch(error => {
-          console.error("There was an error deleting the todo!", error);
+        .catch((error) => {
+          console.error('There was an error deleting the todo!', error);
         });
     },
     toggleComplete(todo) {
       const updatedTodo = { ...todo, isComplete: !todo.isComplete };
-      
-      axios.put(`/TodoItems/${todo.id}`, updatedTodo)
+
+      todoApi.updateToDo(todo.id, updatedTodo)
         .then(() => {
-          const index = this.todos.findIndex(t => t.id === todo.id);
+          const index = this.todos.findIndex((t) => t.id === todo.id);
           this.todos.splice(index, 1, updatedTodo);
           this.playCompleteVideo(); // Video de completado
         })
-        .catch(error => {
-          console.error("There was an error updating the todo!", error);
+        .catch((error) => {
+          console.error('There was an error updating the todo!', error);
         });
     },
     playDeleteVideo() {
-      // const headerVideo = this.$refs.headerVideo;
+      this.resetVideos();
       this.TodoVideoDelete = true;
-      const deleteVideo = this.$refs.deleteVideo;
-      
-      // headerVideo.style.display = 'none';
-      // deleteVideo.style.display = 'block';
-      deleteVideo.play();
+      this.$refs.deleteVideo.play();
     },
     onDeleteVideoEnded() {
-      // const headerVideo = this.$refs.headerVideo;
       this.TodoVideoDelete = false;
-      // const deleteVideo = this.$refs.deleteVideo;
-
-      // deleteVideo.style.display = 'none';
-      // headerVideo.style.display = 'block';
-      // headerVideo.play();
+      this.$refs.headerVideo.play();
     },
     playCompleteVideo() {
-      const headerVideo = this.$refs.headerVideo;
-      const completeVideo = this.$refs.completeVideo;
-
-      headerVideo.style.display = 'none';
-      completeVideo.style.display = 'block';
-      completeVideo.play();
+      this.resetVideos();
+      this.TodoVideoComplete = true;
+      this.$refs.completeVideo.play();
     },
     onCompleteVideoEnded() {
-      const headerVideo = this.$refs.headerVideo;
-      const completeVideo = this.$refs.completeVideo;
-
-      completeVideo.style.display = 'none';
-      headerVideo.style.display = 'block';
-      headerVideo.play();
-    }
+      this.TodoVideoComplete = false;
+      this.$refs.headerVideo.play();
+    },
+    resetVideos() {
+      // Stop and reset all videos
+      if (this.$refs.deleteVideo) {
+        this.$refs.deleteVideo.pause();
+        this.$refs.deleteVideo.currentTime = 0;
+      }
+      if (this.$refs.completeVideo) {
+        this.$refs.completeVideo.pause();
+        this.$refs.completeVideo.currentTime = 0;
+      }
+      this.TodoVideoDelete = false;
+      this.TodoVideoComplete = false;
+    },
   },
   mounted() {
     this.fetchTodos();
-  }
-}
+  },
+};
 </script>
 
 <style>
