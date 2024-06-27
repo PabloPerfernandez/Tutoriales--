@@ -1,5 +1,7 @@
 import axios from 'axios';
 
+axios.defaults.baseURL = 'http://localhost:5001';
+
 export const getToDo = () => {
   return axios.get('/TodoItems');
 };
