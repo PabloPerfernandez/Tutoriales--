@@ -19,7 +19,7 @@
 
 <script>
 import todoApi from '../Api/TodoApi';
-import TodoItem from './TodoItem.vue';
+import TodoItem from './NewTodoItem.vue';
 
 export default {
   data() {
@@ -43,41 +43,37 @@ export default {
           console.error('There was an error fetching the todos!', error);
         });
     },
-    addTodo() {
+    async addTodo() {
       if (this.newTodo.trim() === '') return;
       const todo = { name: this.newTodo, isComplete: false };
-      todoApi.addToDo(todo)
-        .then((response) => {
-          this.todos.push(response.data);
-          this.newTodo = '';
-        })
-        .catch((error) => {
-          console.error('There was an error adding the todo!', error);
-        });
+      try {
+        const response = await todoApi.addToDo(todo)
+        this.todos.push(response.data);
+        this.newTodo = '';
+      } catch (error) {
+        console.error('There was an error adding the todo!', error);
+      }
     },
-    deleteTodo(id) {
-      todoApi.deleteToDo(id)
-        .then(() => {
-          this.todos = this.todos.filter((todo) => todo.id !== id);
-          this.playDeleteVideo(); // Video de eliminación
-        })
-        .catch((error) => {
-          console.error('There was an error deleting the todo!', error);
-        });
+    async deleteTodo(id) {
+      try {
+        this.todos = this.todos.filter((todo) => todo.id !== id);
+        this.playDeleteVideo(); // Video de eliminación
+      } catch (error) {
+        console.error('There was an error deleting the todo!', error);
+      }
     },
-    toggleComplete(todo) {
+    async toggleComplete(todo) {
       const updatedTodo = { ...todo, isComplete: !todo.isComplete };
 
-      todoApi.updateToDo(todo.id, updatedTodo)
-        .then(() => {
-          const index = this.todos.findIndex((t) => t.id === todo.id);
+      try {
+        const index = this.todos.findIndex((t) => t.id === todo.id);
           this.todos.splice(index, 1, updatedTodo);
           this.playCompleteVideo(); // Video de completado
-        })
-        .catch((error) => {
-          console.error('There was an error updating the todo!', error);
-        });
+      } catch (error) {
+        console.error('There was an error updating the todo!', error);
+      }
     },
+    
     playDeleteVideo() {
       this.resetVideos();
       this.TodoVideoDelete = true;
